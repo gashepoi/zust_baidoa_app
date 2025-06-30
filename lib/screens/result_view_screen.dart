@@ -12,137 +12,230 @@ class ResultViewScreen extends StatefulWidget {
 }
 
 class _ResultViewScreenState extends State<ResultViewScreen> {
-  String? selectedSemester = "Semester One";
-  bool showMidtermTable = false;
-  bool showFinalTable = false;
+  final String _currentSemester = "Semester One";
+  String? _selectedExamType; // Waxa uu noqon karaa 'CW1', 'CW2', 'Midterm', ama 'Final'
   final ScrollController _scrollController = ScrollController();
-
-  // Index-ka la doortay ee boggan (default waa 0 - Home)
-  // Waxaad u beddeli kartaa index kale haddii boggani u dhigmo mid ka mid ah tabs (optional)
   int _selectedIndex = 0;
 
-  // Navigation function oo la mid ah kan Dashboard-ka
   void _onItemTapped(int index) {
-    if (index == 0) { // Home
+    if (index == 0) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => StudentDashboard()));
-    } else if (index == 1) { // Events
+    } else if (index == 1) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage()));
-    } else if (index == 2) { // About
+    } else if (index == 2) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => AboutPage()));
-    } else if (index == 3) { // Profile
+    } else if (index == 3) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileMenuPage()));
     }
-    // Looma baahna setState halkan
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100], // Midab khafiif ah oo gadaal ah
       appBar: AppBar(
-        title: Text("Result View"),
-        backgroundColor: Colors.blue,
-        leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.black), onPressed: () => Navigator.of(context).pop()),
+        title: Text("Natiijada Imtixaanka"),
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+        leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
+        elevation: 2.0,
       ),
-      body: SingleChildScrollView( // Body sidii hore
+      body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0), child: Image.network('https://i0.wp.com/zust.edu.so/wp-content/uploads/2022/12/2222-01.png?fit=1375%2C366&ssl=1', height: 100, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => Center(child: Text("Logo Error")))),
+              // QAYBTA LOGO-GA OO KU JIRTA CARD
+              Card(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Image.network('https://i0.wp.com/zust.edu.so/wp-content/uploads/2022/12/2222-01.png?fit=1375%2C366&ssl=1', height: 80, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => Center(child: Text("Logo Error"))),
+                ),
+              ),
               SizedBox(height: 20),
-              Text("Dooro Semester-ka", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue[700])),
-              SizedBox(height: 15),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  decoration: BoxDecoration(border: Border.all(color: Colors.blue.shade300, width: 1), borderRadius: BorderRadius.circular(8), color: Colors.grey[50]),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedSemester, isExpanded: true, icon: Icon(Icons.arrow_drop_down, color: Colors.blue), iconSize: 30, elevation: 8, style: TextStyle(color: Colors.black87, fontSize: 16),
-                      onChanged: (String? newValue) { setState(() { selectedSemester = newValue!; showMidtermTable = false; showFinalTable = false; }); },
-                      items: <String>["Semester One", "Semester Two", "Semester Three", "Semester Four", "Semester Five", "Semester Six", "Semester Seven", "Semester Eight"].map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Center(child: Text(value)))).toList(),
-                    ),
+
+              // QAYBTA DOORASHADA IMTIXAANKA OO KU JIRTA CARD
+              Card(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        "Dooro Nooca Imtixaanka",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue[800]),
+                      ),
+                      SizedBox(height: 20),
+                      // QAABKA 2X2 GRID EE BUTTONS-KA
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // TIIRKA 1-AAD (CW1 & Midterm)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildExamButton("CW1"),
+                                SizedBox(height: 12),
+                                _buildExamButton("Midterm"),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          // TIIRKA 2-AAD (CW2 & Final)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildExamButton("CW2"),
+                                SizedBox(height: 12),
+                                _buildExamButton("Final"),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-              SizedBox(height: 25),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [ _buildExamButton("Midterm Exam"), SizedBox(width: 20), _buildExamButton("Final Exam"), ]),
-              SizedBox(height: 25),
-              if (showMidtermTable || showFinalTable)
-                Container(
-                  constraints: BoxConstraints(maxHeight: 400), margin: const EdgeInsets.symmetric(horizontal: 16.0), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)),
-                  child: Scrollbar(
-                    controller: _scrollController, thumbVisibility: true, thickness: 6, radius: Radius.circular(10),
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            if (showMidtermTable) ...[ Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Text("$selectedSemester - Midterm", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue[800]))), _buildTable(_getMidtermData(selectedSemester)), SizedBox(height: 15)],
-                            if (showFinalTable) ...[ Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Text("$selectedSemester - Final", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple[600]))), _buildTable(_getFinalData(selectedSemester)), SizedBox(height: 10)],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              SizedBox(height: 20),
+
+              // QAYBTA NATIIJADA OO LEH ANIMATION
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: _selectedExamType == null
+                    ? SizedBox.shrink(key: ValueKey('empty')) // Waxba ha soo bandhigin marka hore
+                    : _buildResultCard(key: ValueKey(_selectedExamType)), // Soo bandhig card-ka natiijada
+              ),
               SizedBox(height: 20),
             ],
           ),
         ),
       ),
-      // BottomNavigationBar oo loo beddelay HABKA CAADIGA AH
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.blue[600],
+        selectedItemColor: Colors.blue.shade700,
+        unselectedItemColor: Colors.grey[600],
         backgroundColor: Colors.white,
-        currentIndex: _selectedIndex, // Isticmaal state-ka boggan
-        onTap: _onItemTapped, // Isticmaal function-ka boggan
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home', // Isticmaal label
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.announcement), // La mid ah Dashboard
-            label: 'announcement', // La mid ah Dashboard
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),
-            label: 'About',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.announcement), label: 'Announcement'),
+          BottomNavigationBarItem(icon: Icon(Icons.info_outline), label: 'About'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),
     );
   }
 
-  // _buildExamButton sidii hore
+  // WIDGET-KA BUTTON-KA OO LA HAGAAJIYAY
   Widget _buildExamButton(String title) {
-    bool isActive = (title == "Midterm Exam" && showMidtermTable) || (title == "Final Exam" && showFinalTable);
-    Color buttonColor = isActive ? Colors.blue : Colors.lightBlue.shade100; Color textColor = isActive ? Colors.white : Colors.blue.shade800;
-    return ElevatedButton(onPressed: () { setState(() { if (title == "Midterm Exam") { showMidtermTable = true; showFinalTable = false; } else { showFinalTable = true; showMidtermTable = false; } }); }, child: Text(title), style: ElevatedButton.styleFrom(backgroundColor: buttonColor, foregroundColor: textColor, padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12), textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w600), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), elevation: isActive ? 4 : 2));
+    bool isActive = _selectedExamType == title;
+    return ElevatedButton(
+      onPressed: () { setState(() { _selectedExamType = title; }); },
+      child: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isActive ? Colors.blue.shade700 : Colors.white,
+        foregroundColor: isActive ? Colors.white : Colors.blue.shade700,
+        padding: EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: Colors.blue.shade200, width: 1.5),
+        ),
+        elevation: isActive ? 5 : 1,
+      ),
+    );
   }
 
-  // _buildTable sidii hore
+  // WIDGET-KA SOO BANDHIGAYA CARD-KA NATIIJADA
+  Widget _buildResultCard({required ValueKey<String?> key}) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            Text(
+              "Natiijada: $_currentSemester - $_selectedExamType",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+            ),
+            SizedBox(height: 10),
+            Divider(),
+            Container(
+              constraints: BoxConstraints(maxHeight: 350), // Si uusan aad u dheeraan
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: _buildTable(_getExamData(_selectedExamType!)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // SHAXDA OO LA QURXIYAY (Zebra-striping)
   Widget _buildTable(List<List<String>> data) {
-    if (data.isEmpty) { return Padding(padding: const EdgeInsets.symmetric(vertical: 20.0), child: Text("Natiijo lama helin semester-kan weli.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600], fontStyle: FontStyle.italic, fontSize: 15))); }
-    return DataTable(headingRowColor: MaterialStateColor.resolveWith((states) => Colors.blue.shade50), headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade900, fontSize: 15), columnSpacing: 35.0, dataRowHeight: 45.0, columns: const <DataColumn>[DataColumn(label: Text('Maadada')), DataColumn(label: Text('Darajada')), DataColumn(label: Text('GPA'))], rows: data.map<DataRow>((row) => DataRow(cells: row.map<DataCell>((cell) => DataCell(Text(cell))).toList())).toList());
+    if (data.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: Text("Natiijo lama helin imtixaankan weli.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600], fontStyle: FontStyle.italic, fontSize: 16)),
+      );
+    }
+    return DataTable(
+      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.blue.shade50),
+      headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade900, fontSize: 15),
+      columnSpacing: 35.0,
+      dataRowHeight: 48.0,
+      columns: const <DataColumn>[
+        DataColumn(label: Text('Maadada')),
+        DataColumn(label: Text('Darajada')),
+        DataColumn(label: Text('GPA')),
+      ],
+      // Ku daridda midab kala duwan safafka
+      rows: data.asMap().entries.map<DataRow>((entry) {
+        final int index = entry.key;
+        final List<String> rowData = entry.value;
+        final Color rowColor = index.isOdd ? Colors.blue.shade50.withOpacity(0.4) : Colors.white;
+
+        return DataRow(
+          color: MaterialStateProperty.all(rowColor),
+          cells: rowData.map<DataCell>((cell) => DataCell(Text(cell))).toList(),
+        );
+      }).toList(),
+    );
   }
 
-  // _getMidtermData sidii hore
-  List<List<String>> _getMidtermData(String? semester) { switch (semester) { case "Semester One": return [["Algebra", "B+", "3.7"],["Philosophy", "A", "4.0"],["Physics", "B", "3.2"],["History", "B-", "2.8"],["Programming", "A-", "3.9"],]; case "Semester Two": return [["Statistics", "A", "4.0"],["Database Systems", "B+", "3.6"],["Artificial Intelligence", "A-", "3.8"],["Geography", "B", "3.3"],["Finance", "B-", "3.0"],]; default: return []; } }
+  // FUNCTIONS-KA XOGTA (WAXBA LAGA MA BEDDELIN)
+  List<List<String>> _getExamData(String examType) {
+    switch (examType) {
+      case 'CW1': return _getCW1Data(_currentSemester);
+      case 'CW2': return _getCW2Data(_currentSemester);
+      case 'Midterm': return _getMidtermData(_currentSemester);
+      case 'Final': return _getFinalData(_currentSemester);
+      default: return [];
+    }
+  }
 
-  // _getFinalData sidii hore
-  List<List<String>> _getFinalData(String? semester) { switch (semester) { case "Semester One": return [["Calculus", "B", "3.2"],["Ethics", "A-", "3.9"],["Physics", "A", "4.0"],["World History", "B+", "3.7"],["Data Structures", "B", "3.3"],]; case "Semester Two": return [["Machine Learning", "A+", "4.0"],["Cyber Security", "B", "3.2"],["Economics", "A", "4.0"],["Environmental Science", "B+", "3.5"],["Marketing", "B-", "3.0"],]; default: return []; } }
-
-// Function-kan _buildIconWithText looma baahna halkan
+  List<List<String>> _getCW1Data(String semester) { /* ... Xogta sidii hore ... */ return [["Algebra (CW1)", "A", "4.0"], ["Physics (CW1)", "B", "3.2"], ["Programming (CW1)", "A-", "3.9"]]; }
+  List<List<String>> _getCW2Data(String semester) { /* ... Xogta sidii hore ... */ return [["Philosophy (CW2)", "A", "4.0"], ["History (CW2)", "C+", "2.5"], ["Programming (CW2)", "B", "3.3"]]; }
+  List<List<String>> _getMidtermData(String semester) { /* ... Xogta sidii hore ... */ return [["Algebra", "B+", "3.7"],["Philosophy", "A", "4.0"],["Physics", "B", "3.2"],["History", "B-", "2.8"],["Programming", "A-", "3.9"],];}
+  List<List<String>> _getFinalData(String semester) { /* ... Xogta sidii hore ... */ return [["Calculus", "B", "3.2"],["Ethics", "A-", "3.9"],["Physics", "A", "4.0"],["World History", "B+", "3.7"],["Data Structures", "B", "3.3"],];}
 }
 
 
